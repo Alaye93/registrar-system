@@ -1,0 +1,50 @@
+/* Sidebar Refinement */
+.sidebar {
+  background: #020617 !important; /* Force deep navy */
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-item.active {
+  background: rgba(212, 175, 55, 0.1);
+  border-right: 3px solid var(--gold);
+  color: var(--gold) !important;
+}
+
+/* Transform the White Cards into Tactical Cards */
+.card-container, .stat-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-main) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 2px !important; /* Sharper edges */
+}
+
+/* Search Bar Tactical Look */
+input[type="text"], .search-bar {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--gold) !important;
+  font-family: 'JetBrains Mono', monospace;
+  border-radius: 0px !important;
+}
+
+input:focus {
+  border-color: var(--gold) !important;
+  outline: none;
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+
+/* + Register New Entry Button */
+.register-btn {
+  background: transparent !important;
+  border: 1px solid var(--gold) !important;
+  color: var(--gold) !important;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.register-btn:hover {
+  background: var(--gold) !important;
+  color: #000 !important;
+}

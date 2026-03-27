@@ -1,0 +1,124 @@
+/* Command & Control Theme for EDCSC */
+:root {
+  --command-navy: #0a192f;
+  --insignia-gold: #c5a059;
+  --slate-gray: #ccd6f6;
+  --field-bg: #112240;
+  --alert-red: #ff4d4d;
+}
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Deep textured background for a professional military feel */
+  background: radial-gradient(circle at center, #112240 0%, #0a192f 100%);
+  padding: 20px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.auth-card {
+  background: var(--command-navy);
+  border: 1px solid var(--insignia-gold); /* Gold border for authority */
+  border-radius: 4px; /* Sharper corners feel more disciplined */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(197, 160, 89, 0.05);
+  padding: 50px;
+  max-width: 450px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative "Classified" stripe at the top */
+.auth-card::before {
+  content: "OFFICIAL USE ONLY • RESTRICTED ACCESS";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: var(--insignia-gold);
+  color: var(--command-navy);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 40px;
+  margin-top: 10px;
+}
+
+.auth-header h1 {
+  color: var(--insignia-gold);
+  font-size: 26px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 10px 0;
+}
+
+.auth-header p {
+  color: var(--slate-gray);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+.auth-form h2 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(204, 214, 246, 0.1);
+  padding-bottom: 10px;
+}
+
+.form-group label {
+  color: var(--insignia-gold);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.form-group input {
+  background: var(--field-bg);
+  border: 1px solid #233554;
+  border-radius: 4px;
+  color: white;
+  padding: 14px;
+  transition: border 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: var(--insignia-gold);
+  box-shadow: 0 0 10px rgba(197, 160, 89, 0.1);
+}
+
+.btn-primary {
+  background: var(--insignia-gold);
+  color: var(--command-navy);
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 16px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.btn-primary:hover {
+  background: #d4b47a;
+  box-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
+}
+
+.error-message {
+  background: rgba(255, 77, 77, 0.1);
+  color: var(--alert-red);
+  border: 1px solid var(--alert-red);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+}
