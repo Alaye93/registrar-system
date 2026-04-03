@@ -1,73 +1,77 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiShieldOff, FiArrowLeft, FiHome } from 'react-icons/fi';
+import { FiShieldOff, FiArrowLeft, FiHome, FiAlertTriangle, FiLock } from 'react-icons/fi';
 import '../styles/Auth.css';
 
 /**
- * Unauthorized Access Component
- * System: EduRegistrar ERP v2.0
- * Purpose: Handles 403 Forbidden scenarios for Role-Based Access Control (RBAC).
+ * Unauthorized Access Page
+ * EDCSC Registrar System - Security Protocol
+ * Handles 403 Forbidden with professional military protocol
  */
+
 export const Unauthorized = () => {
   const navigate = useNavigate();
 
+  const handleGoBack = () => navigate(-1);
+  const handleGoHome = () => navigate('/dashboard');
+
   return (
-    <div className="auth-container unauthorized-page fade-in">
+    <div className="auth-container unauthorized-page">
       <div className="auth-card security-border">
         <div className="unauthorized-content">
+          {/* Security Icon with Advanced Animation */}
           <div className="security-icon-wrapper">
-            <FiShieldOff size={64} className="error-icon-pulse" />
+            <FiShieldOff size={78} className="error-icon-pulse" />
+            <div className="security-ring-1"></div>
+            <div className="security-ring-2"></div>
           </div>
-          
-          <h1 className="error-title">Access Restricted</h1>
+
+          <div className="error-header">
+            <div className="error-code">ERROR 403 • ACCESS DENIED</div>
+            <h1 className="error-title">UNAUTHORIZED ACCESS</h1>
+          </div>
+
           <div className="error-divider"></div>
-          
+
           <p className="error-message">
-            Your current account privileges do not permit access to this administrative module. 
-            Please contact the <strong>DCSC IT Department</strong> if you believe this is an error.
+            Your current security clearance does not permit access to this restricted module.<br />
+            This attempt has been logged under <strong>Protocol RBAC-403</strong>.
           </p>
+
+          <div className="security-notice">
+            <FiAlertTriangle size={20} />
+            <span>Contact DCSC IT Security Division if you believe this is an error.</span>
+          </div>
 
           <div className="unauthorized-actions">
             <button 
-              onClick={() => navigate(-1)} 
+              onClick={handleGoBack} 
               className="btn-ghost"
             >
-              <FiArrowLeft /> Go Back
+              <FiArrowLeft size={18} />
+              RETURN TO PREVIOUS PAGE
             </button>
             
             <button 
-              onClick={() => navigate('/dashboard')} 
+              onClick={handleGoHome} 
               className="btn-primary"
             >
-              <FiHome /> Dashboard
+              <FiHome size={18} />
+              RETURN TO DASHBOARD
             </button>
           </div>
         </div>
       </div>
 
+      {/* Security Footer */}
       <div className="security-footer">
-        <small>Protocol: RBAC-Enforced-Session | IP Logged</small>
+        <div className="protocol-info">
+          <FiLock size={14} /> PROTOCOL RBAC-ENFORCED • SESSION LOGGED • IP RECORDED
+        </div>
+        <div className="system-info">
+          ETHIOPIAN DEFENSE COMMAND AND STAFF COLLEGE • 2026
+        </div>
       </div>
-
-      <style jsx="true">{`
-        .unauthorized-page { background: #f8fafc; }
-        .security-border { border-top: 4px solid #ef4444; text-align: center; padding: 40px; }
-        .security-icon-wrapper { color: #ef4444; margin-bottom: 20px; }
-        .error-title { color: #1e293b; font-size: 1.75rem; font-weight: 800; margin: 0; }
-        .error-divider { height: 2px; width: 50px; background: #e2e8f0; margin: 15px auto; }
-        .error-message { color: #64748b; line-height: 1.6; margin-bottom: 30px; max-width: 320px; margin-left: auto; margin-right: auto; }
-        .unauthorized-actions { display: flex; gap: 12px; justify-content: center; }
-        .security-footer { margin-top: 20px; color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .error-icon-pulse {
-          animation: pulse-red 2s infinite;
-        }
-
-        @keyframes pulse-red {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.1); opacity: 0.7; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 };

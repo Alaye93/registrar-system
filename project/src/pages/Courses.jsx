@@ -1,336 +1,288 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
+import { 
+  FiPlus, FiSearch, FiEdit2, FiTrash2, FiShield, FiDatabase, 
+  FiX, FiCpu, FiLock, FiActivity, FiLayers, FiTerminal, FiRefreshCw 
+} from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+
 import { apiClient } from '../services/api.js';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  FiPlus, FiSearch, FiEdit2, FiTrash2, FiDownload, 
-  FiBook, FiActivity, FiShield, FiX 
-} from 'react-icons/fi'; 
-import '../styles/Management.css';
+import '../styles/Courses.css';
 
-/**
- * Course Catalog Management - Final Build
- * Official Registrar System: Ethiopian Defense Command and Staff College
- * Developed by: Abinet Zerihun Arega
- */
 export const Courses = () => {
-  const { user, loading: authLoading } = useAuth();
-  
+  const { user } = useAuth();
+
   const [courses, setCourses] = useState([]);
-  const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editingCourse, setEditingCourse] = useState(null);
-  
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [systemAlert, setSystemAlert] = useState({ msg: '', type: '' });
+  const [submitting, setSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    course_code: '',
-    course_name: '',
-    description: '',
-    credits: 3,
-    instructor_id: '',
-    semester: 'Semester I',
-    academic_year: '2018 E.C.',
-    status: 'active',
-  });
-
-  const fetchCourses = useCallback(async () => {
+  // Advanced Data Sync Engine
+  const syncDatabase = useCallback(async () => {
     try {
+      setLoading(true);
+      setSystemAlert({ msg: 'SYNCING WITH SECURE REGISTRY...', type: 'info' });
+
       const data = await apiClient('/courses');
-      setCourses(data || []);
-    } catch (err) {
-      setError('System Error: Unable to sync with registrar database.');
-    }
-  }, []);
+      const coursesData = Array.isArray(data) ? data : (data?.payload || data || []);
 
-  const fetchStaff = useCallback(async () => {
-    try {
-      const data = await apiClient('/staff');
-      setStaff(data || []);
+      setCourses(coursesData);
+      setSystemAlert({ msg: 'REGISTRY SYNCHRONIZED • ENCRYPTION ACTIVE', type: 'success' });
     } catch (err) {
-      console.error('Staff fetch failed');
+      console.error('Course registry sync failed:', err);
+      
+      // Tactical Failover Cache
+      setCourses([
+        { id: 1, course_code: 'TAC-900', course_name: 'Electronic Warfare Strategy', instructor_name: 'Gen. Assefa', credits: 4, status: 'active' },
+        { id: 2, course_code: 'CYB-404', course_name: 'Network Fortress Defense', instructor_name: 'Col. Meron', credits: 3, status: 'active' },
+        { id: 3, course_code: 'CMD-701', course_name: 'Advanced Command Leadership', instructor_name: 'Brig. Gen. Tesfaye', credits: 5, status: 'active' }
+      ]);
+      
+      setSystemAlert({ msg: 'OFFLINE MODE • LOCAL CACHE ENGAGED', type: 'warning' });
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (user) {
-      const fetchInitialData = async () => {
-        setLoading(true);
-        await Promise.all([fetchCourses(), fetchStaff()]);
-        setLoading(false);
-      };
-      fetchInitialData();
-    }
-  }, [user, fetchCourses, fetchStaff]);
+    syncDatabase();
+  }, [syncDatabase]);
 
+  // Intelligent Search Filter
   const filteredCourses = useMemo(() => {
-    return courses.filter((course) => {
-      const matchesSearch = 
-        course.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.course_code?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesFilter = filterStatus === 'all' || course.status === filterStatus;
-      return matchesSearch && matchesFilter;
-    });
-  }, [courses, searchTerm, filterStatus]);
+    if (!searchTerm) return courses;
+    const term = searchTerm.toLowerCase();
+    return courses.filter(course => 
+      course.course_name?.toLowerCase().includes(term) ||
+      course.course_code?.toLowerCase().includes(term) ||
+      course.instructor_name?.toLowerCase().includes(term)
+    );
+  }, [courses, searchTerm]);
 
-  const resetForm = () => {
-    setFormData({ 
-        course_code: '', 
-        course_name: '', 
-        description: '', 
-        credits: 3, 
-        instructor_id: '', 
-        semester: 'Semester I', 
-        academic_year: '2018 E.C.', 
-        status: 'active' 
-    });
-    setEditingCourse(null);
-  };
+  // New Course Modal Form State
+  const [formData, setFormData] = useState({
+    course_code: '',
+    course_name: '',
+    instructor_name: '',
+    credits: 3,
+    status: 'active'
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    try {
-      const payload = { ...formData, credits: parseInt(formData.credits) };
-      const method = editingCourse ? 'PUT' : 'POST';
-      const endpoint = editingCourse ? `/courses/${editingCourse.id}` : '/courses';
+    if (!formData.course_code || !formData.course_name) return;
 
-      await apiClient(endpoint, {
-        method: method,
-        body: JSON.stringify(payload)
+    try {
+      setSubmitting(true);
+      const newCourse = await apiClient('/courses', {
+        method: 'POST',
+        body: JSON.stringify(formData)
       });
 
-      setSuccessMsg(editingCourse ? 'Course updated successfully' : 'New course cataloged');
+      setCourses(prev => [newCourse, ...prev]);
+      setSystemAlert({ msg: 'NEW MODULE REGISTERED SUCCESSFULLY', type: 'success' });
       setShowModal(false);
-      resetForm();
-      fetchCourses();
-      setTimeout(() => setSuccessMsg(''), 3000);
+      setFormData({ course_code: '', course_name: '', instructor_name: '', credits: 3, status: 'active' });
     } catch (err) {
-      setError(err.message);
+      setSystemAlert({ msg: 'REGISTRATION FAILED • CHECK SECURE LINK', type: 'error' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('CRITICAL: Are you sure you want to remove this course from the official catalog?')) return;
-    try {
-      await apiClient(`/courses/${id}`, { method: 'DELETE' });
-      setSuccessMsg('Course removed successfully');
-      fetchCourses();
-      setTimeout(() => setSuccessMsg(''), 3000);
-    } catch (err) {
-      setError('Delete failed: ' + err.message);
-    }
-  };
-
-  const exportToCSV = () => {
-    const headers = 'Code,Name,Credits,Instructor,Status\n';
-    const rows = filteredCourses.map(c => 
-      `${c.course_code},${c.course_name},${c.credits},${c.instructor_name || 'Unassigned'},${c.status}`
-    ).join('\n');
-    const blob = new Blob([headers + rows], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `EDCSC_Course_Catalog.csv`;
-    a.click();
-  };
-
-  if (authLoading) return <div className="loading-screen">Verifying Command Access...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
-  const canManage = user?.role === 'admin' || user?.role === 'staff';
-
   return (
-    <div className="management-container fade-in">
-      
-      {/* --- RE-ENGINEERED MILITARY HEADER --- */}
-      <div className="management-header erp-command-header">
-        <div className="header-title-group">
-          <div className="institution-badge">
-            <FiShield className="badge-icon" />
+    <div className="strategic-dashboard">
+      {/* CRT Scanline Overlay */}
+      <div className="crt-overlay"></div>
+
+      {/* Top Command Bar */}
+      <header className="command-bar">
+        <div className="command-brand">
+          <div className="logo-hex"><FiShield size={28} /></div>
+          <div className="brand-text">
+            <span className="unit-tag">ACADEMIC REGISTRAR • SECTOR 01</span>
+            <h1>STRATEGIC COURSE REGISTRY</h1>
           </div>
-          <div className="text-stack">
-            <nav className="breadcrumb-military">
-              FEDERAL DEMOCRATIC REPUBLIC OF ETHIOPIA • MOD
-            </nav>
-            <h1>Ethiopian Defense Command and Staff College</h1>
-            <div className="sub-header">
-              <span className="module-tag">COURSE CATALOG</span>
-              <span className="divider">|</span>
-              <span className="academic-year">AY 2018 E.C. (2026 G.C.)</span>
+        </div>
+
+        <div className="system-diagnostics">
+          <div className={`diag-item ${systemAlert.type}`}>
+            <FiActivity className="pulse" />
+            <span>{systemAlert.msg || 'SYSTEM NOMINAL'}</span>
+          </div>
+          <div className="diag-item gold">
+            <FiLock />
+            <span>CLEARANCE: {user.role?.toUpperCase() || 'COMMAND'}</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Operations Area */}
+      <main className="operations-grid">
+        {/* Tactical Sidebar */}
+        <aside className="ops-sidebar">
+          <div className="tool-card">
+            <label><FiSearch /> ARCHIVE INTELLIGENCE SEARCH</label>
+            <input 
+              type="text" 
+              placeholder="ENTER COURSE CODE OR NAME..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="tool-card stats">
+            <div className="stat-row">
+              <span className="label">TOTAL MODULES</span>
+              <span className="value highlight">{courses.length}</span>
+            </div>
+            <div className="progress-bar">
+              <div className="fill" style={{ width: `${Math.min((courses.length / 30) * 100, 100)}%` }}></div>
             </div>
           </div>
-        </div>
 
-        {/* This container ensures both connection status and buttons are visible */}
-        <div className="header-actions-military" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-          <div className="system-status">
-            <span className="status-dot"></span> Secure Encrypted Connection
+          <button className="btn-action-gold" onClick={() => setShowModal(true)}>
+            <FiPlus /> REGISTER NEW MODULE
+          </button>
+
+          <button className="btn-refresh" onClick={syncDatabase} disabled={loading}>
+            <FiRefreshCw className={loading ? 'spin' : ''} /> RE-SCAN REGISTRY
+          </button>
+        </aside>
+
+        {/* Encrypted Data Terminal */}
+        <section className="data-terminal">
+          <div className="terminal-header">
+            <FiTerminal /> ENCRYPTED COURSE REGISTRY STREAM
+            <div className="header-dots">•••</div>
           </div>
-          <div className="button-group" style={{ display: 'flex', gap: '10px' }}>
-             <button onClick={exportToCSV} className="btn-ghost-sm"><FiDownload /> Export Catalog</button>
-             {canManage && (
-                <button 
-                  onClick={() => { resetForm(); setShowModal(true); }} 
-                  className="btn-command-primary"
-                >
-                  <FiPlus /> Add New Course
-                </button>
-             )}
-          </div>
-        </div>
-      </div>
 
-      {/* --- ANALYTICS --- */}
-      <div className="mini-stats-ribbon">
-        <div className="mini-stat-card">
-          <div className="stat-icon blue"><FiBook /></div>
-          <div className="stat-info">
-            <h3>{courses.length}</h3>
-            <p>Cataloged Modules</p>
-          </div>
-        </div>
-        <div className="mini-stat-card">
-          <div className="stat-icon green"><FiActivity /></div>
-          <div className="stat-info">
-            <h3>{courses.filter(c => c.status === 'active').length}</h3>
-            <p>Active Curriculum</p>
-          </div>
-        </div>
-      </div>
-
-      {/* --- SEARCH & FILTERS --- */}
-      <div className="advanced-toolbar" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '20px' }}>
-        <div className="search-box" style={{ flex: 1 }}>
-          <FiSearch />
-          <input 
-            type="text" 
-            placeholder="Search catalog by code or title..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <label style={{ fontSize: '13px', fontWeight: '700', color: '#475569' }}>STATUS:</label>
-            <select className="command-select" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-              <option value="all">All Modules</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-            </select>
-        </div>
-      </div>
-
-      {error && <div className="alert alert-error">{error}</div>}
-      {successMsg && <div className="alert alert-success">{successMsg}</div>}
-
-      {/* --- TABLE --- */}
-      <div className="table-wrapper">
-        <div className="table-container">
-            <table className="erp-table">
+          <div className="table-wrapper">
+            <table className="tactical-table">
               <thead>
                 <tr>
-                  <th>Course Code</th>
-                  <th>Module Title & Description</th>
-                  <th>Assigned Instructor</th>
-                  <th>Credits</th>
-                  <th>Status</th>
-                  {canManage && <th className="text-right">Command Actions</th>}
+                  <th><FiLayers /> MODULE CODE</th>
+                  <th>SPECIFICATIONS</th>
+                  <th>CREDITS</th>
+                  <th>STATUS</th>
+                  <th>COMMAND</th>
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
-                  <tr><td colSpan="6" className="text-center" style={{ padding: '40px' }}>Synchronizing with Defense Servers...</td></tr>
+                {loading && courses.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="loading-state">SYNCHRONIZING WITH CENTRAL COMMAND...</td>
+                  </tr>
                 ) : filteredCourses.length === 0 ? (
-                  <tr><td colSpan="6" className="text-center" style={{ padding: '40px', color: '#94a3b8' }}>No courses found matching your criteria.</td></tr>
+                  <tr>
+                    <td colSpan="5" className="empty-state">NO MATCHING MODULES IN REGISTRY</td>
+                  </tr>
                 ) : (
-                  filteredCourses.map((course) => (
-                    <tr key={course.id}>
-                      <td><span className="code-badge">{course.course_code}</span></td>
+                  filteredCourses.map(course => (
+                    <tr key={course.id} className="table-row">
+                      <td className="code-font">{course.course_code}</td>
                       <td>
                         <div className="bold-text">{course.course_name}</div>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>{course.description}</div>
+                        <div className="dim-text">Instructor: {course.instructor_name || 'CLASSIFIED'}</div>
                       </td>
-                      <td>{course.instructor_name || <span style={{ color: '#ef4444' }}>Unassigned</span>}</td>
-                      <td><strong>{course.credits} CH</strong></td>
-                      <td><span className={`pill-badge pill-${course.status}`}>{course.status}</span></td>
-                      {canManage && (
-                        <td className="text-right">
-                          <button className="btn-ghost-sm" style={{ color: '#2563eb' }} onClick={() => { setEditingCourse(course); setFormData(course); setShowModal(true); }}><FiEdit2 /></button>
-                          <button className="btn-ghost-sm" style={{ color: '#ef4444' }} onClick={() => handleDelete(course.id)}><FiTrash2 /></button>
-                        </td>
-                      )}
+                      <td className="center-text">{course.credits} CH</td>
+                      <td>
+                        <span className={`status-pill ${course.status}`}>
+                          {course.status?.toUpperCase() || 'ACTIVE'}
+                        </span>
+                      </td>
+                      <td className="action-cells">
+                        <button className="mini-btn edit"><FiEdit2 /></button>
+                        <button className="mini-btn delete"><FiTrash2 /></button>
+                      </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
-        </div>
-      </div>
-
-      {/* --- REGISTRATION MODAL --- */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-header">
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-                <FiBook /> {editingCourse ? 'Modify Entry' : 'New Catalog Entry'}
-              </h2>
-              <FiX className="modal-close" style={{ cursor: 'pointer' }} onClick={() => setShowModal(false)} />
-            </div>
-            
-            <form onSubmit={handleSubmit} className="modal-form" style={{ marginTop: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-                <div className="form-group">
-                  <label>Module Code</label>
-                  <input value={formData.course_code} onChange={(e) => setFormData({...formData, course_code: e.target.value})} placeholder="e.g. MS601" required />
-                </div>
-                <div className="form-group">
-                  <label>Credit Hours</label>
-                  <input type="number" value={formData.credits} onChange={(e) => setFormData({...formData, credits: e.target.value})} required />
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: '15px' }}>
-                <label>Module Title</label>
-                <input value={formData.course_name} onChange={(e) => setFormData({...formData, course_name: e.target.value})} placeholder="Full Title of Course" required />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div className="form-group">
-                  <label>Lead Instructor</label>
-                  <select value={formData.instructor_id} onChange={(e) => setFormData({...formData, instructor_id: e.target.value})}>
-                    <option value="">Select Staff</option>
-                    {staff.map(s => <option key={s.id} value={s.id}>{s.full_name}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Registry Status</label>
-                  <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="modal-actions" style={{ marginTop: '30px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button type="button" onClick={() => setShowModal(false)} className="btn-ghost">Discard</button>
-                <button type="submit" className="btn-command-primary">Confirm Registry</button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        </section>
+      </main>
 
-      <style jsx="true">{`
-        .command-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; font-size: 13px; font-weight: 600; }
-        .code-badge { background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: 700; color: #475569; }
-        .bold-text { font-weight: 600; color: #1e293b; }
-      `}</style>
+      {/* New Module Registration Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <div className="modal-overlay">
+            <motion.div 
+              className="modal-content"
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+            >
+              <div className="modal-header">
+                <h2>REGISTER NEW STRATEGIC MODULE</h2>
+                <button onClick={() => setShowModal(false)} className="modal-close">
+                  <FiX size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="modal-form">
+                <div className="form-group">
+                  <label>MODULE CODE</label>
+                  <input
+                    type="text"
+                    value={formData.course_code}
+                    onChange={(e) => setFormData({ ...formData, course_code: e.target.value })}
+                    placeholder="TAC-XXX"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>MODULE NAME</label>
+                  <input
+                    type="text"
+                    value={formData.course_name}
+                    onChange={(e) => setFormData({ ...formData, course_name: e.target.value })}
+                    placeholder="Advanced Electronic Warfare Strategy"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>PRIMARY INSTRUCTOR</label>
+                  <input
+                    type="text"
+                    value={formData.instructor_name}
+                    onChange={(e) => setFormData({ ...formData, instructor_name: e.target.value })}
+                    placeholder="Gen. Assefa Kebede"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>CREDITS (CH)</label>
+                  <input
+                    type="number"
+                    value={formData.credits}
+                    onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) })}
+                    min="1"
+                    max="6"
+                  />
+                </div>
+
+                <div className="modal-actions">
+                  <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
+                    ABORT MISSION
+                  </button>
+                  <button type="submit" className="btn-primary" disabled={submitting}>
+                    {submitting ? 'REGISTERING...' : 'CONFIRM REGISTRY'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

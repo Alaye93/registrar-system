@@ -1,34 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiShield } from 'react-icons/fi'; // Icons for a "Super" look
+import { FiMail, FiLock, FiEye, FiEyeOff, FiShield } from 'react-icons/fi';
 import '../styles/Auth.css';
 
 export const Login = () => {
   const navigate = useNavigate();
-  // FIXED: Added 'loading' and 'user' from context
   const { signIn, user, loading: authLoading } = useAuth();
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // REDIRECT IF ALREADY LOGGED IN
-  // If the user is already authenticated, don't show the login screen
+  // Redirect if already logged in
   if (user && !authLoading) {
     return <Navigate to="/dashboard" replace />;
   }
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    if (error) setError(''); // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -36,53 +28,51 @@ export const Login = () => {
     setError('');
     setLoading(true);
 
-    // 1. Basic Validation
     if (!formData.email || !formData.password) {
-      setError('Please provide both email and password.');
+      setError('Please provide both your email and password.');
       setLoading(false);
       return;
     }
 
-    // 2. Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid academic email address.');
+      setError('Please enter a valid email address.');
       setLoading(false);
       return;
     }
 
     try {
-      // 3. Call the SQL Server-based signIn
       const result = await signIn(formData.email, formData.password);
 
-      if (result.success) {
+      if (result?.success) {
         navigate('/dashboard');
       } else {
-        // Handle specific error messages from your Node.js backend
-        setError(result.message || 'Authentication failed. Check your credentials.');
+        setError(result?.message || 'Authentication failed. Please check your credentials.');
       }
-    } catch (err) {
-      setError('Server Connection Error. Please verify the backend API is online.');
+    } catch {
+      setError('Unable to connect to the server. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (authLoading) return <div className="loading-screen">Verifying Session...</div>;
+  if (authLoading) {
+    return <div className="loading-screen">Verifying session...</div>;
+  }
 
   return (
     <div className="auth-outer-wrapper">
       <div className="auth-container fade-in">
         <div className="auth-card">
-          <div className="auth-header">
+          <header className="auth-header">
             <div className="auth-logo">
-               <FiShield size={40} color="#2563eb" />
+              <FiShield size={40} color="#2563eb" />
             </div>
             <h1>EDCSC Registrar</h1>
             <p>Defence Command and Staff College</p>
-          </div>
+          </header>
 
-          <form onSubmit={handleSubmit} className="auth-form">
+          <form onSubmit={handleSubmit} className="auth-form" noValidate>
             <h2>Secure Login</h2>
 
             {error && (
@@ -103,6 +93,8 @@ export const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  autoComplete="email"
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -112,35 +104,43 @@ export const Login = () => {
               <div className="input-with-icon">
                 <FiLock className="input-icon" />
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  autoComplete="current-password"
+                  disabled={loading}
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  disabled={loading}
                 >
                   {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
               </div>
             </div>
 
-            <button type="submit" className="btn-login-submit" disabled={loading}>
+            <button 
+              type="submit" 
+              className="btn-login-submit" 
+              disabled={loading}
+            >
               {loading ? (
                 <span className="spinner-small">Authenticating...</span>
               ) : (
                 'Sign In to Portal'
               )}
             </button>
-            
-            <div className="auth-footer-note">
+
+            <footer className="auth-footer-note">
               <p>© 2026 EDCSC Information Systems Unit</p>
-            </div>
+            </footer>
           </form>
         </div>
       </div>

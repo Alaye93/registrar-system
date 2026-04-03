@@ -5,51 +5,85 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || 'EDCSC_TACTICAL_SECURE_2026';
+
 app.use(express.json());
 
-// Enable CORS for your React frontend
-app.use(cors({ origin: 'http://localhost:5173' }));
+// CORS
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-const JWT_SECRET = process.env.JWT_SECRET || 'EDCSC_SUPER_SECRET_2026';
-
-// Database Configuration
-const dbConfig = {
-    user: 'sa',
-    password: 'Abinet123', 
-    server: '127.0.0.1',
-    database: 'EduRegistrar',
-    options: { 
-        encrypt: false, 
-        trustServerCertificate: true 
-    }
-};
-
-// Create Connection Pool
-const poolPromise = new sql.ConnectionPool(dbConfig).connect()
-    .then(pool => { 
-        console.log('✅ Connected to SQL Server: EduRegistrar'); 
-        return pool; 
-    })
-    .catch(err => {
-        console.error('❌ Database Connection Failed: ', err);
-        process.exit(1);
-    });
-
-// --- JWT MIDDLEWARE ---
+// ====================== JWT AUTH MIDDLEWARE ======================
+// Define this FIRST before using it in routes
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (!token) return res.status(401).json({ error: "Access Denied" });
+    if (!token) {
+        return res.status(401).json({ error: "Access Denied: Missing Token" });
+    }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: "Token Expired or Invalid" });
+        if (err) {
+            return res.status(403).json({ error: "Access Revoked: Token Expired or Invalid" });
+        }
         req.user = user;
         next();
     });
 };
 
-// --- AUTHENTICATION ---
+// ====================== DATABASE CONFIG ======================
+const dbConfig = {
+    user: process.env.DB_USER || 'sa',
+    password: process.env.DB_PASSWORD || 'Abinet123',
+    server: process.env.DB_SERVER || '127.0.0.1',
+    database: process.env.DB_NAME || 'EduRegistrar',
+    options: {
+        encrypt: false,
+        trustServerCertificate: true,
+        enableArithAbort: true
+    },
+    pool: {
+        max: 15,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+};
+
+const poolPromise = new sql.ConnectionPool(dbConfig).connect()
+    .then(pool => {
+        console.log('✅ SQL SERVER HANDSHAKE: STABLE [EduRegistrar]');
+        return pool;
+    })
+    .catch(err => {
+        console.error('❌ CRITICAL DATABASE FAILURE:', err.message);
+        process.exit(1);
+    });
+
+// ====================== RESPONSE WRAPPER MIDDLEWARE ======================
+app.use((req, res, next) => {
+    const originalJson = res.json;
+    res.json = function (data) {
+        const enhancedResponse = {
+            metadata: {
+                server_timestamp: new Date().toISOString(),
+                transaction_id: `EDCSC-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+                connection_status: "STABLE"
+            },
+            payload: data
+        };
+        originalJson.call(this, enhancedResponse);
+    };
+    next();
+});
+
+// ====================== API ROUTES ======================
+
+// LOGIN (No auth required)
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -64,132 +98,67 @@ app.post('/api/login', async (req, res) => {
             const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
             res.json({ success: true, token, user });
         } else {
-            res.status(401).json({ error: "Invalid email or password" });
+            res.status(401).json({ error: "Credential Verification Failed" });
         }
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: "INTERNAL_SQL_ERROR: " + err.message });
     }
 });
 
-// --- DASHBOARD STATISTICS ---
-app.get('/api/dashboard-stats', authenticateToken, async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request().query(`
-            SELECT 
-                (SELECT COUNT(*) FROM dbo.students) AS totalStudents,
-                (SELECT COUNT(*) FROM dbo.staff) AS activeStaff,
-                (SELECT COUNT(*) FROM dbo.enrollments) AS totalEnrollments,
-                (SELECT COUNT(*) FROM dbo.courses) AS totalCourses
-        `);
-        res.json(result.recordset[0]);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- STUDENT MANAGEMENT ---
-app.get('/api/students', authenticateToken, async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request().query('SELECT id, full_name, email, phone, [status] FROM dbo.students');
-        res.json(result.recordset);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- COURSE MANAGEMENT ---
+// COURSES
 app.get('/api/courses', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query('SELECT * FROM dbo.courses');
         res.json(result.recordset);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: "Courses table error: " + err.message });
     }
 });
 
-// --- ATTENDANCE SYSTEM ---
+// STUDENTS
+app.get('/api/students', authenticateToken, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query('SELECT id, StudentID, FullName, Email, Phone, Status FROM dbo.students');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: "Students table error: " + err.message });
+    }
+});
 
-// 1. Get active enrollments for the "Mark Attendance" dropdown
-app.get('/api/enrollments/active', authenticateToken, async (req, res) => {
+// STAFF
+app.get('/api/staff', authenticateToken, async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query('SELECT * FROM dbo.staff');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: "Staff table error: " + err.message });
+    }
+});
+
+// ENROLLMENTS
+app.get('/api/enrollments', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query(`
-            SELECT e.id, s.full_name, c.course_name, e.course_id 
+            SELECT e.*, s.FullName as student_name, c.course_name 
             FROM dbo.enrollments e
-            JOIN dbo.students s ON e.student_id = s.id
-            JOIN dbo.courses c ON e.course_id = c.id
-            WHERE e.status = 'active'
+            LEFT JOIN dbo.students s ON e.student_id = s.id
+            LEFT JOIN dbo.courses c ON e.course_id = c.id
         `);
         res.json(result.recordset);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: "Enrollment error: " + err.message });
     }
 });
 
-// 2. Get attendance history for a specific course
-app.get('/api/attendance', authenticateToken, async (req, res) => {
-    const { courseId } = req.query;
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request()
-            .input('courseId', sql.Int, courseId)
-            .query(`
-                SELECT a.*, s.full_name, p.full_name as marked_by_name 
-                FROM dbo.attendance a
-                JOIN dbo.enrollments e ON a.enrollment_id = e.id
-                JOIN dbo.students s ON e.student_id = s.id
-                LEFT JOIN dbo.profiles p ON a.marked_by = p.id
-                WHERE e.course_id = @courseId
-                ORDER BY a.[date] DESC
-            `);
-        res.json(result.recordset);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// 3. Save new attendance records (Supports single or bulk)
-app.post('/api/attendance', authenticateToken, async (req, res) => {
-    const records = Array.isArray(req.body) ? req.body : [req.body];
-    try {
-        const pool = await poolPromise;
-        const transaction = new sql.Transaction(pool);
-        await transaction.begin();
-
-        try {
-            for (const record of records) {
-                await transaction.request()
-                    .input('enrollment_id', sql.Int, record.enrollment_id)
-                    .input('date', sql.Date, record.date)
-                    .input('status', sql.NVarChar, record.status)
-                    .input('notes', sql.NVarChar, record.notes || '')
-                    .input('marked_by', sql.Int, record.marked_by)
-                    .query(`
-                        INSERT INTO dbo.attendance (enrollment_id, [date], [status], notes, marked_by)
-                        VALUES (@enrollment_id, @date, @status, @notes, @marked_by)
-                    `);
-            }
-            await transaction.commit();
-            res.json({ success: true, message: "Attendance recorded successfully" });
-        } catch (err) {
-            await transaction.rollback();
-            throw err;
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- HEALTH CHECK ---
+// HEALTH CHECK
 app.get('/', (req, res) => {
-    res.send('Registrar API is running perfectly! 🚀');
+    res.send('🚀 EDCSC Command API: ONLINE');
 });
 
-// Start Server
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Production Server running at: http://localhost:${PORT}`);
+    console.log(`🚀 EDCSC Sector Node Running: http://localhost:${PORT}`);
 });

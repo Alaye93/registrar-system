@@ -2,13 +2,9 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
-  FiUsers, 
-  FiBook, 
-  FiUserCheck, 
-  FiBriefcase, 
-  FiLogOut, 
-  FiPieChart 
-} from 'react-icons/fi'; // Install react-icons: npm install react-icons
+  FiPieChart, FiUsers, FiBook, FiUserCheck, 
+  FiBriefcase, FiLogOut, FiChevronRight 
+} from 'react-icons/fi';
 import "./styles/Sidebar.css";
 
 const Sidebar = () => {
@@ -30,29 +26,51 @@ const Sidebar = () => {
 
   return (
     <aside className="sidebar">
+      {/* HEADER WITH LOGO */}
       <div className="sidebar-header">
-        <div className="logo-badge">EDCSC</div>
-        <h2 className="brand-name">Registrar & Alumni</h2>
+        <img 
+          src="/logo.png" 
+          alt="EDCSC Logo" 
+          className="sidebar-logo-img" 
+        />
+        <div className="brand-info">
+          <div className="logo-badge">EDCSC</div>
+          <h2 className="brand-name">Registrar & Alumni</h2>
+        </div>
       </div>
 
+      {/* COMMAND MENU - Made Bigger & Prominent */}
+      <div className="command-menu-header">
+        COMMAND MENU
+      </div>
+
+      {/* NAVIGATION */}
       <nav className="sidebar-nav">
         {navItems.map((item) => (
           <NavLink 
             key={item.name} 
             to={item.path} 
-            className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+            className={({ isActive }) => 
+              isActive ? 'nav-link active' : 'nav-link'
+            }
           >
             <span className="nav-icon">{item.icon}</span>
             <span className="nav-text">{item.name}</span>
+            <FiChevronRight className="nav-arrow" />
           </NavLink>
         ))}
       </nav>
 
+      {/* FOOTER */}
       <div className="sidebar-footer">
         <button onClick={handleLogout} className="logout-btn">
-          <FiLogOut />
-          <span>Sign Out</span>
+          <FiLogOut size={18} />
+          <span>SIGN OUT SYSTEM</span>
         </button>
+        
+        <div className="secured-info">
+          SECURED • CLEARANCE LEVEL 4
+        </div>
       </div>
     </aside>
   );

@@ -1,50 +1,307 @@
-/* Sidebar Refinement */
-.sidebar {
-  background: #020617 !important; /* Force deep navy */
-  border-right: 1px solid var(--border);
+/* =============================================
+   EDCSC UNIFIED TACTICAL INTERFACE v6.0 (FINAL)
+   Command-Level Professional UI
+============================================= */
+
+:root {
+  /* ===== BACKGROUND SYSTEM ===== */
+  --bg-core: #020617;
+  --bg-gradient: radial-gradient(circle at 25% 20%, #0f172a 0%, #020617 55%, #000000 100%);
+  --bg-surface: rgba(15, 23, 42, 0.88);
+  --bg-elevated: rgba(30, 41, 59, 0.95);
+
+  --bg-overlay: linear-gradient(
+    120deg,
+    rgba(197, 160, 89, 0.05),
+    rgba(59, 130, 246, 0.04),
+    transparent 70%
+  );
+
+  /* ===== COLORS ===== */
+  --accent-gold: #c5a059;
+  --tactical-blue: #3b82f6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --text-primary: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --border-tactical: rgba(197, 160, 89, 0.25);
+
+  --sidebar-width: 260px;
 }
 
-.sidebar-item.active {
-  background: rgba(212, 175, 55, 0.1);
-  border-right: 3px solid var(--gold);
-  color: var(--gold) !important;
+/* ===== RESET ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/* Transform the White Cards into Tactical Cards */
-.card-container, .stat-card {
-  background: var(--bg-card) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--text-main) !important;
-  backdrop-filter: blur(10px);
-  border-radius: 2px !important; /* Sharper edges */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-core);
+  background-image: var(--bg-gradient);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
 }
 
-/* Search Bar Tactical Look */
-input[type="text"], .search-bar {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--gold) !important;
-  font-family: 'JetBrains Mono', monospace;
-  border-radius: 0px !important;
+/* ===== BACKGROUND EFFECTS ===== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  pointer-events: none;
+  z-index: 0;
 }
 
-input:focus {
-  border-color: var(--gold) !important;
-  outline: none;
-  box-shadow: 0 0 10px var(--gold-glow);
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* + Register New Entry Button */
-.register-btn {
-  background: transparent !important;
-  border: 1px solid var(--gold) !important;
-  color: var(--gold) !important;
+/* ===== MAIN CONTAINERS ===== */
+.dashboard-container,
+.management-container,
+.students-page,
+.staff-page {
+  height: 100vh;
+  padding: 2rem;
+  margin-left: var(--sidebar-width);
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== HEADER ===== */
+.dashboard-header,
+.management-header,
+.students-header,
+.staff-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.75rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 3px solid var(--accent-gold);
+}
+
+.header-left h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.header-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+}
+
+/* ===== STATS ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.75rem;
+  margin-bottom: 2.75rem;
+}
+
+.stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-tactical);
+  border-left: 6px solid var(--accent-gold);
+  padding: 1.75rem;
+  border-radius: 12px;
+  transition: 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent-gold);
+  box-shadow: 0 15px 35px rgba(197,160,89,0.25);
+}
+
+.stat-label {
+  font-size: 0.75rem;
   text-transform: uppercase;
-  font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
 }
 
-.register-btn:hover {
-  background: var(--gold) !important;
-  color: #000 !important;
+.stat-value {
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin-top: 5px;
+}
+
+/* ===== CONTROL BAR ===== */
+.control-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.search-wrapper {
+  flex: 1;
+  min-width: 320px;
+  position: relative;
+}
+
+.search-wrapper input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid #475569;
+  border-radius: 10px;
+  padding: 14px 18px 14px 50px;
+  color: var(--text-primary);
+}
+
+.search-wrapper input:focus {
+  border-color: var(--accent-gold);
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-gold);
+}
+
+/* ===== TABLE ===== */
+.table-container {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-tactical);
+}
+
+.officer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.officer-table th {
+  background: #020617;
+  color: var(--accent-gold);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 1.2rem;
+}
+
+.officer-table td {
+  padding: 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.officer-table tr:hover {
+  background: rgba(197,160,89,0.07);
+}
+
+/* ===== AVATAR ===== */
+.avatar {
+  width: 48px;
+  height: 48px;
+  background: #1e40af;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 2px solid var(--tactical-blue);
+}
+
+/* ===== STATUS ===== */
+.status-badge {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.status-badge.active {
+  background: rgba(16,185,129,0.15);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.status-badge.inactive {
+  background: rgba(239,68,68,0.15);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+/* ===== BUTTON ===== */
+.action-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.action-btn:hover {
+  color: var(--accent-gold);
+  background: rgba(197,160,89,0.1);
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.95);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--bg-surface);
+  border: 2px solid var(--accent-gold);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 500px;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .dashboard-container,
+  .management-container,
+  .students-page,
+  .staff-page {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
 }

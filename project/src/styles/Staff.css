@@ -1,0 +1,322 @@
+/* =============================================
+   EDCSC PERSONNEL COMMAND SECTOR (Staff)
+   Professional Military Grade Tactical UI
+   Ethiopian Defense Command and Staff College
+   Version: 3.0
+============================================= */
+
+:root {
+  --command-navy: #0a0f1c;
+  --field-bg: #1e293b;
+  --insignia-gold: #c5a059;
+  --slate-gray: #94a3b8;
+  --slate-muted: #64748b;
+  --success-green: #10b981;
+  --alert-red: #ef4444;
+  --navy-accent: #112240;
+}
+
+/* ==================== MAIN CONTAINER ==================== */
+.staff-page {
+  background: #0a0f1c;
+  min-height: 100vh;
+  color: #f1f5f9;
+  padding: 2rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-y: auto;
+}
+
+/* ==================== HEADER ==================== */
+.staff-header {
+  background: #1e293b;
+  border-bottom: 3px solid var(--insignia-gold);
+  padding: 1.8rem 2rem;
+  border-radius: 8px;
+  margin-bottom: 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.header-left h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--insignia-gold);
+  margin: 0;
+}
+
+.header-subtitle {
+  color: var(--slate-gray);
+  font-size: 0.9rem;
+  letter-spacing: 1.2px;
+}
+
+/* ==================== STATS RIBBON ==================== */
+.stats-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-node {
+  background: var(--field-bg);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  border-radius: 12px;
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+}
+
+.stat-node:hover {
+  transform: translateY(-4px);
+  border-color: var(--insignia-gold);
+}
+
+.stat-node label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--slate-muted);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-node .value {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+/* ==================== CONTROL BAR ==================== */
+.control-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.search-wrapper {
+  flex: 1;
+  position: relative;
+  min-width: 340px;
+}
+
+.search-wrapper input {
+  width: 100%;
+  background: var(--field-bg);
+  border: 1px solid #475569;
+  border-radius: 10px;
+  padding: 14px 20px 14px 52px;
+  color: white;
+  font-size: 0.95rem;
+}
+
+.search-wrapper input:focus {
+  border-color: var(--insignia-gold);
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--insignia-gold);
+}
+
+/* ==================== TABLE ==================== */
+.table-container {
+  background: var(--field-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(197, 160, 89, 0.15);
+}
+
+.officer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.officer-table th {
+  background: #0f172a;
+  color: var(--insignia-gold);
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 1.4rem 1.5rem;
+  text-align: left;
+}
+
+.officer-table td {
+  padding: 1.4rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.officer-table tr:hover {
+  background: rgba(197, 160, 89, 0.07);
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  background: #1e40af;
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.15rem;
+  border: 2px solid #3b82f6;
+}
+
+.status-badge {
+  padding: 6px 18px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.status-badge.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-green);
+  border: 1px solid var(--success-green);
+}
+
+.status-badge.on-leave {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+}
+
+.status-badge.inactive {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--alert-red);
+  border: 1px solid var(--alert-red);
+}
+
+/* ==================== MODAL ==================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--field-bg);
+  border: 2px solid var(--insignia-gold);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  color: var(--insignia-gold);
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-muted);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #475569;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--insignia-gold);
+  outline: none;
+}
+
+/* ==================== UTILITIES ==================== */
+.action-btn {
+  background: none;
+  border: none;
+  color: var(--slate-gray);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  color: var(--insignia-gold);
+  background: rgba(197, 160, 89, 0.1);
+}
+
+.empty-state {
+  padding: 6rem 2rem;
+  text-align: center;
+  color: var(--slate-muted);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .staff-page {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .staff-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .control-bar {
+    flex-direction: column;
+  }
+}

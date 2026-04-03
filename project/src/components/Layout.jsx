@@ -2,33 +2,42 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAuth } from '../contexts/AuthContext';
-import './styles/Sidebar.css';
 
 const Layout = () => {
   const { user } = useAuth();
 
   return (
     <div className="app-layout">
-      /* Sidebar stays fixed on the left */
+      {/* Fixed Tactical Sidebar */}
       <Sidebar />
 
+      {/* Main Content Area */}
       <div className="main-wrapper">
-        {/* Top Header Bar */}
+        
+        {/* Top Professional Header */}
         <header className="top-header">
           <div className="header-left">
-            <span className="college-title">DIRECTORATE REGISTRAR AND ALUMNI</span>
+            <div className="command-info">
+              <span className="command-level">COMMAND LEVEL 04</span>
+              <span className="system-title">REGISTRAR INTELLIGENCE</span>
+            </div>
           </div>
+
           <div className="header-right">
             <div className="user-profile">
-              <span className="user-name">{user?.full_name}</span>
-              <span className="user-role-tag">{user?.role}</span>
+              <div className="user-info">
+                <span className="user-name">{user?.full_name || 'Commander'}</span>
+                <span className="user-role">{user?.role?.toUpperCase() || 'OFFICER'}</span>
+              </div>
+              <div className="user-avatar">
+                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : 'C'}
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Main Content Area */}
+        {/* Dynamic Page Content */}
         <main className="content-area">
-          {/* The Outlet renders the current page (Dashboard, Courses, etc.) */}
           <Outlet />
         </main>
       </div>

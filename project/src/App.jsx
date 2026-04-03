@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react'; // Added useEffect
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Layout from './components/Layout';
 
-// Pages - Ensuring Named Imports
+// Pages - Using NAMED imports (consistent with your components)
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
-import { Courses } from './pages/Courses'; 
+import { Courses } from './pages/Courses';
 import { Enrollments } from './pages/Enrollments';
 import { Attendance } from './pages/Attendance';
 import { AcademicRecords } from './pages/AcademicRecords';
@@ -17,9 +17,10 @@ import { MyCourses } from './pages/MyCourses';
 import { MyAttendance } from './pages/MyAttendance';
 import { MyGrades } from './pages/MyGrades';
 import { Unauthorized } from './pages/Unauthorized';
+import './index.css'
 
 function App() {
-  // Global Interactive Glow Effect for all .tactical-card elements
+  // Global Interactive Glow Effect
   useEffect(() => {
     const handleMouseMove = (e) => {
       document.querySelectorAll('.tactical-card').forEach(card => {
@@ -30,23 +31,22 @@ function App() {
         card.style.setProperty('--y', `${y}%`);
       });
     };
+
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   return (
     <AuthProvider>
-      {/* Root Wrapper for Tactical CSS Context */}
       <div className="hq-dashboard-layout">
         <BrowserRouter>
           <Routes>
-            {/* --- PUBLIC ACCESS --- */}
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* --- PROTECTED ERP INTERFACE --- */}
+            {/* Protected Routes */}
             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-              
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/students" element={<Students />} />
               <Route path="/courses" element={<Courses />} />
@@ -58,10 +58,9 @@ function App() {
               <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/my-attendance" element={<MyAttendance />} />
               <Route path="/my-grades" element={<MyGrades />} />
-
             </Route>
 
-            {/* --- REDIRECTS --- */}
+            {/* Redirects */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

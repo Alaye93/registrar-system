@@ -1,0 +1,468 @@
+/* =============================================
+   EDCSC Attendance Tracking Module
+   Theme: Command & Control | Military Grade
+   Version: 1.0
+   ============================================= */
+
+/* ---------- Extend root variables if not present ---------- */
+:root {
+  --command-navy: #0a192f;
+  --insignia-gold: #c5a059;
+  --slate-gray: #ccd6f6;
+  --field-bg: #112240;
+  --alert-red: #ff4d4d;
+  --success-green: #2ecc71;
+  --warning-amber: #f59e0b;
+  --slate-muted: #8892b0;
+  --gold-military: #c5a059;
+}
+
+/* ---------- Container override for Attendance ---------- */
+.management-container {
+  background: radial-gradient(circle at 10% 20%, #0a192f, #051021);
+  padding: 2rem 1.5rem;
+}
+
+/* ---------- Toolbar Section ---------- */
+.toolbar-section {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  position: relative;
+  flex: 2;
+  max-width: 450px;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--insignia-gold);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-select {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  background: var(--field-bg);
+  border: 1px solid #233554;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85rem;
+  appearance: none;
+  cursor: pointer;
+  transition: border 0.2s;
+}
+
+.search-select:focus {
+  border-color: var(--insignia-gold);
+  outline: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--insignia-gold);
+  color: var(--insignia-gold);
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(197, 160, 89, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Alert Box ---------- */
+.alert-box {
+  background: rgba(255, 77, 77, 0.1);
+  border-left: 4px solid var(--alert-red);
+  color: var(--alert-red);
+  padding: 12px 16px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+
+.close-alert {
+  margin-left: auto;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.close-alert:hover {
+  color: white;
+}
+
+/* ---------- Stats Grid (3 Cards) ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 35px;
+}
+
+.stat-card {
+  background: var(--field-bg);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-left: 4px solid;
+}
+
+.stat-icon {
+  font-size: 1.6rem;
+  padding: 10px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.stat-content h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.stat-content p {
+  margin: 6px 0 0 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--slate-muted);
+}
+
+/* Individual stat card colours */
+.stat-card.present {
+  border-left-color: var(--success-green);
+}
+.stat-card.present .stat-icon {
+  background: rgba(46, 204, 113, 0.15);
+  color: var(--success-green);
+}
+.stat-card.present .stat-content h3 {
+  color: var(--success-green);
+}
+
+.stat-card.absent {
+  border-left-color: var(--alert-red);
+}
+.stat-card.absent .stat-icon {
+  background: rgba(255, 77, 77, 0.15);
+  color: var(--alert-red);
+}
+.stat-card.absent .stat-content h3 {
+  color: var(--alert-red);
+}
+
+.stat-card.excused {
+  border-left-color: var(--warning-amber);
+}
+.stat-card.excused .stat-icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning-amber);
+}
+.stat-card.excused .stat-content h3 {
+  color: var(--warning-amber);
+}
+
+/* ---------- Table Wrapper ---------- */
+.table-wrapper {
+  background: rgba(10, 25, 47, 0.6);
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid #233554;
+  margin-bottom: 20px;
+}
+
+.erp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  color: var(--slate-gray);
+}
+
+.erp-table thead tr {
+  background: var(--command-navy);
+  border-bottom: 1px solid var(--insignia-gold);
+}
+
+.erp-table th {
+  text-align: left;
+  padding: 14px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--insignia-gold);
+}
+
+.erp-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #1e2f44;
+  vertical-align: middle;
+}
+
+.erp-table tbody tr:hover {
+  background: rgba(197, 160, 89, 0.05);
+}
+
+/* Status pills inside table */
+.status-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pill.present {
+  background: rgba(46, 204, 113, 0.2);
+  color: #6eef9e;
+}
+
+.status-pill.absent {
+  background: rgba(255, 77, 77, 0.2);
+  color: #ff8a8a;
+}
+
+.status-pill.excused {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.notes-text {
+  font-size: 0.75rem;
+  color: var(--slate-muted);
+}
+
+.marked-by-tag {
+  font-size: 0.7rem;
+  background: #1e3a5f;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--insignia-gold);
+  font-weight: 500;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 60px !important;
+  color: var(--slate-muted);
+  font-style: italic;
+}
+
+/* ---------- Table Loader ---------- */
+.table-loader {
+  padding: 60px;
+  text-align: center;
+  color: var(--insignia-gold);
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* ---------- Modal Override (Attendance specific) ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+
+.modal-card {
+  background: var(--command-navy);
+  border: 1px solid var(--insignia-gold);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 550px;
+  padding: 0;
+  box-shadow: 0 25px 40px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #233554;
+  background: #0c1c2f;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--insignia-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--slate-gray);
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.close-btn:hover {
+  color: var(--alert-red);
+}
+
+/* Form inside modal */
+.erp-form {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--insignia-gold);
+  font-weight: 600;
+}
+
+.erp-form input,
+.erp-form select,
+.erp-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--field-bg);
+  border: 1px solid #233554;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+.erp-form input:focus,
+.erp-form select:focus,
+.erp-form textarea:focus {
+  border-color: var(--insignia-gold);
+  outline: none;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid #233554;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--slate-muted);
+  color: var(--slate-gray);
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05);
+}
+
+.btn-primary {
+  background: var(--insignia-gold);
+  color: var(--command-navy);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #d4b47a;
+  box-shadow: 0 0 8px rgba(197,160,89,0.4);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .toolbar-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-group {
+    max-width: none;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .modal-card {
+    max-width: 95%;
+  }
+  .erp-table th,
+  .erp-table td {
+    padding: 10px 6px;
+    font-size: 0.75rem;
+  }
+}
